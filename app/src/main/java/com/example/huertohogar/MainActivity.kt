@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
             HuertoHogarTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = "Android",
+                        name = "Hola",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
