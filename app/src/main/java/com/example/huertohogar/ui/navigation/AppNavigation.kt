@@ -1,11 +1,6 @@
 package com.example.huertohogar.ui.navigation
 
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,7 +9,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Remove
@@ -27,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -42,7 +35,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
-import com.example.huertohogar.R
 import com.example.huertohogar.data.model.CartItem
 import com.example.huertohogar.data.model.Product
 import com.example.huertohogar.ui.viewmodel.CartViewModel
@@ -189,7 +181,6 @@ fun DrawerContent(navController: NavController, closeDrawer: () -> Unit) {
                     closeDrawer()
                 }
             )
-            // You can add more items like "Profile", "Settings", "Logout" here.
         }
     }
 }
@@ -237,7 +228,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 
             Button(
                 onClick = {
-                    // In a real app, you would validate credentials here
                     onLoginSuccess()
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -371,7 +361,7 @@ fun ShoppingCartScreen(cartViewModel: CartViewModel) {
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(cartItems, key = { it.product.id }) { item ->
-                    // Swipe to delete functionality
+                    // =================== SECCIÓN CORREGIDA ===================
                     val dismissState = rememberDismissState(
                         confirmValueChange = {
                             if (it == DismissValue.DismissedToEnd || it == DismissValue.DismissedToStart) {
@@ -379,22 +369,33 @@ fun ShoppingCartScreen(cartViewModel: CartViewModel) {
                                 return@rememberDismissState true
                             }
                             false
-                        }
+                        },
+                        // Positional threshold specifies the fraction of the width that needs to be swiped
+                        positionalThreshold = { 150.dp.toPx() }
                     )
+
                     SwipeToDismiss(
                         state = dismissState,
                         directions = setOf(DismissDirection.StartToEnd, DismissDirection.EndToStart),
                         background = {
-                            val color = when (dismissState.targetValue) {
-                                DismissValue.Default -> Color.Transparent
-                                else -> Color.Red.copy(alpha = 0.8f)
+                            val color by animateColorAsState(
+                                when (dismissState.targetValue) {
+                                    DismissValue.DismissedToEnd -> Color.Red.copy(alpha = 0.8f)
+                                    DismissValue.DismissedToStart -> Color.Red.copy(alpha = 0.8f)
+                                    else -> Color.Transparent
+                                }
+                            )
+                            val alignment = when (dismissState.dismissDirection) {
+                                DismissDirection.StartToEnd -> Alignment.CenterStart
+                                DismissDirection.EndToStart -> Alignment.CenterEnd
+                                null -> Alignment.Center
                             }
                             Box(
                                 Modifier
                                     .fillMaxSize()
                                     .background(color, shape = RoundedCornerShape(12.dp))
                                     .padding(horizontal = 20.dp),
-                                contentAlignment = Alignment.CenterEnd
+                                contentAlignment = alignment
                             ) {
                                 Icon(
                                     Icons.Default.Delete,
@@ -412,6 +413,7 @@ fun ShoppingCartScreen(cartViewModel: CartViewModel) {
                             )
                         }
                     )
+                    // ================= FIN DE SECCIÓN CORREGIDA ================
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -483,3 +485,4 @@ fun CartItemCard(item: CartItem, onQuantityChange: (Int) -> Unit) {
         }
     }
 }
+
